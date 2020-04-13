@@ -1,0 +1,14 @@
+{
+    "name": "jwp/example-app",
+    "require": {
+        "slim/slim": "^4.4",
+        "guzzlehttp/psr7": "^1.6",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "guzzlehttp/guzzle": "~6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jwp\\": "src/jwp/"
+        }
+    }
+}
