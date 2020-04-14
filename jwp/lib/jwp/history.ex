@@ -105,12 +105,8 @@ defmodule Jwp.History do
   def handle_info(:timeout, s(tab: tab) = state) do
     # @todo cancel purge timer ?
     case :ets.info(tab, :size) do
-      0 ->
-        {:stop, :normal, state}
-
-      data ->
-        IO.inspect(data, label: :size)
-        {:noreply, state}
+      0 -> {:stop, :normal, state}
+      data -> {:noreply, state}
     end
   end
 
@@ -133,7 +129,7 @@ defmodule Jwp.History do
       end
 
     count = :ets.select_delete(tab, match_spec)
-    Logger.debug("Deleted #{count} entries from table")
+    # Logger.debug("Deleted #{count} entries from table")
     :ok
   end
 end
