@@ -48,7 +48,7 @@ $app->post('/chat', function (Request $request, Response $response, $args) {
     $message = $contents['message'];
     $request =  $request->withParsedBody($contents);
     $jwp = new Jwp\Client(JWP_USERNAME, JWP_PASSWORD);
-    $x = $jwp->push('general', 'chat_msg', ['message' => $message]);
+    $jwp->push('general', 'chat_msg', ['message' => $message]);
     $response = $response->withHeader('Content-type', 'application/json');
     $response->getBody()->write(json_encode(['status' => 'ok']));
     return $response;

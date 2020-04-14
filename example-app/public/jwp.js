@@ -1553,14 +1553,73 @@
     }, this.timerCalc(this.tries + 1));
   };
 
+  function closure$1 (value) {
+    if(typeof value === 'function'){
+      return value
+    } else {
+      var closure = function(){ return value };
+      return closure
+    }
+  }
+
+  var storage;
+
+  // @todo use sessionStorage in production
+  if (window.localStorage) {
+    storage = window.localStorage;
+  } else {
+    storage = {
+      getItem: function getItem() { return null }, 
+      setItem: function setItem() {} 
+    };
+  }
+
+  function msgIDStorageKey(channel) {
+    return  ("jsp_msgid__" + channel)
+  }
+
+  function getLastMsgID(channelName) {
+    var key = msgIDStorageKey(channelName);
+    var value = storage.getItem(key);
+    console.log("value", value);
+    var data = (null === value) ? null : JSON.parse(value);
+    console.log('getLastMsgID %s =>',channelName, data);
+    return data
+  }
+
+  function setLastMsgID(channelName, id) {
+    console.log('setLastMsgID',channelName, id);
+    var key = msgIDStorageKey(channelName);
+    storage.setItem(key, JSON.stringify(id));
+  }
+
   function connect(params) {
     var user_id = params.user_id;
-    var socket = new Socket("ws://localhost:4000/socket", { params: params });
+    var socket = new Socket('ws://localhost:4000/socket', { params: params });
     socket.connect();
     var makeChannel = socket.channel.bind(socket);
-    socket.channel = function(name, params) {
-      return makeChannel(("jwp:" + user_id + ":" + name), params)
+    socket.channel = function(channelName, params) {
+      
+      params = closure$1(params || {});
+      
+      var paramsWithTimestamp = function() {
+        var id = getLastMsgID(channelName); // maybe null
+        return Object.assign({}, {last_message_id: id}, params())
+      };
+
+      var channel =  makeChannel(("jwp:" + user_id + ":" + channelName), paramsWithTimestamp);
+      
+      channel.onMessage = function(_event, payload, _ref) {
+        if (payload && payload.tid) {
+          setLastMsgID(channelName, payload.tid);
+          return payload.data
+        }
+        return payload
+      };
+      
+      return channel
     };
+    
     return socket
   }
 

@@ -2,11 +2,15 @@ defmodule JwpWeb.MainChannel do
   use JwpWeb, :channel
   require Logger
 
-  def join("jwp:" <> scope, payload, socket) do
+  def join("jwp:" <> scope = channel, payload, socket) do
+    IO.inspect(payload, label: "payload")
+
     with {:ok, claim_id, name} <- decode_scope(scope),
          :ok <- check_user_id(socket, claim_id),
          :ok <- check_channel(socket, name) do
       Logger.debug("joining '#{name}'")
+      # history will send messages to this channel process from a Task
+      maybe_poll_history(channel, payload)
       {:ok, socket}
     else
       err ->
@@ -37,21 +41,33 @@ defmodule JwpWeb.MainChannel do
     end
   end
 
-  # Channels can be used in a request/response fashion
-  # by sending replies to requests from the client
-  def handle_in("ping", payload, socket) do
-    {:reply, {:ok, payload}, socket}
+  # when is_map(tid) 
+  defp maybe_poll_history(channel, %{"last_message_id" => nil}),
+    do: :ok
+
+  defp maybe_poll_history(channel, %{"last_message_id" => tid}) do
+    this = self()
+
+    # @todo link task to channel process ?
+    Task.Supervisor.start_child(Jwp.TaskSup, fn ->
+      messages =
+        Jwp.History.get_messages_after(channel, tid)
+        |> Enum.each(fn {event, payload} ->
+          send(this, {:history_message, event, payload})
+        end)
+    end)
   end
 
-  # It is also common to receive messages from the client and
-  # broadcast to everyone in the current topic (main_channel:lobby).
-  def handle_in("shout", payload, socket) do
-    broadcast(socket, "shout", payload)
+  defp maybe_poll_history(_, _),
+    do: :ignore
+
+  def handle_info({:history_message, event, payload}, socket) do
+    push(socket, event, payload)
     {:noreply, socket}
   end
 
-  # Add authorization logic here as required.
-  defp authorized?(_payload) do
-    true
+  def handle_info(msg, socket) do
+    Logger.warn("Unhandled info in #{__MODULE__}: #{inspect(msg)}")
+    {:noreply, socket}
   end
 end
