@@ -33,17 +33,23 @@ defmodule Jwp.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.4.16"},
-      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix, "~> 1.5.0-rc.0", override: true},
+      {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"},
-      #
+      {:plug_cowboy, "~> 2.1"},
+
+      # App
       {:pow, "~> 1.0.19"},
-      {:ex2ms, "~> 1.0"}
+      {:ex2ms, "~> 1.0"},
+
+      # Dashboard
+      {:phoenix_live_dashboard, "~> 0.1"},
+      {:phoenix_live_view, ">= 0.0.0"},
+      {:floki, ">= 0.0.0", only: :test}
     ]
   end
 

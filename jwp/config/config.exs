@@ -15,7 +15,7 @@ config :jwp, JwpWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "7MMyu85GNk6l+IupirOS3qk99MUkfMzwVVEppjxuJGCv1gEvSOersTwMqElXOxi7",
   render_errors: [view: JwpWeb.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Jwp.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: Jwp.PubSub,
   live_view: [signing_salt: "kkubeq7y"]
 
 # Configures Elixir's Logger

@@ -20,4 +20,23 @@ defmodule JwpWeb.Router do
     post "/token/authorize-socket", TokenController, :auth_socket
     post "/push", PushController, :push_message
   end
+
+  # Dashboard
+
+  import Phoenix.LiveDashboard.Router
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
+  if Mix.env() == :dev do
+    scope "/" do
+      pipe_through :browser
+      live_dashboard "/dashboard"
+    end
+  end
 end
