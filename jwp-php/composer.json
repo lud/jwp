@@ -1,0 +1,13 @@
+{
+    "name": "jeuweb/jwp",
+    "description": "PHP client for jwp",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Jwp\\": "src/jwp/"
+        }
+    }
+}
